@@ -14,6 +14,6 @@ provider "clickup" {
 data "clickup_teams" "teams" {}
 
 output "outtie" {
-    value = data.clickup_teams.teams
+    value = data.clickup_teams.teams.teams[*].id
 }
 

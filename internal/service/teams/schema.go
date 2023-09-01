@@ -32,6 +32,7 @@ func (c *ClickUpTeamsDataSource) Schema(ctx context.Context, req datasource.Sche
                                 Attributes: map[string]schema.Attribute{
                                     "user": schema.SingleNestedAttribute{
                                         Computed: true,
+                                        Optional: true,
                                         Attributes: map[string]schema.Attribute{
                                             "id": schema.Int64Attribute{
                                                 Computed: true,
@@ -67,6 +68,7 @@ func (c *ClickUpTeamsDataSource) Schema(ctx context.Context, req datasource.Sche
                                     },
                                     "invited_by": schema.SingleNestedAttribute{
                                         Computed: true,
+                                        Optional: true,
                                         Attributes: map[string]schema.Attribute{
                                             "id": schema.Int64Attribute{
                                                 Computed: true,
