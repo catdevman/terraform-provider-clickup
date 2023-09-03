@@ -93,6 +93,50 @@ func (c *ClickUpTeamsDataSource) Schema(ctx context.Context, req datasource.Sche
                                 },
                             },
                         },
+                        "seats": schema.SingleNestedAttribute{
+                            Computed: true,
+                            Attributes: map[string]schema.Attribute{
+                                "members": schema.SingleNestedAttribute{
+                                    Computed: true,
+                                    Attributes: map[string]schema.Attribute{
+                                        "filled_members_seats": schema.Int64Attribute{
+                                            Computed: true,
+                                        },
+                                        "total_member_seats": schema.Int64Attribute{
+                                            Computed: true,
+                                        },
+                                        "empty_member_seats": schema.Int64Attribute{
+                                            Computed: true,
+                                        },
+                                    },
+                                },
+                                "guests": schema.SingleNestedAttribute{
+                                    Computed: true,
+                                    Attributes: map[string]schema.Attribute{
+                                        "filled_guest_seats": schema.Int64Attribute{
+                                            Computed: true,
+                                        },
+                                        "total_guest_seats": schema.Int64Attribute{
+                                            Computed: true,
+                                        },
+                                        "empty_guest_seats": schema.Int64Attribute{
+                                            Computed: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "plan": schema.SingleNestedAttribute{
+                            Computed: true,
+                            Attributes: map[string]schema.Attribute{
+                                "id": schema.Int64Attribute{
+                                    Computed: true,
+                                },
+                                "name": schema.StringAttribute{
+                                    Computed: true,
+                                },
+                            },
+                        },
                     },
                 },
             },
