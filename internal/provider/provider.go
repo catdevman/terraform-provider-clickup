@@ -5,19 +5,24 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/catdevman/terraform-provider-clickup/internal/consts"
+	"github.com/catdevman/terraform-provider-clickup/internal/service/folder"
+	folderlesslists "github.com/catdevman/terraform-provider-clickup/internal/service/folderless_lists"
+	"github.com/catdevman/terraform-provider-clickup/internal/service/folders"
+	"github.com/catdevman/terraform-provider-clickup/internal/service/lists"
+	"github.com/catdevman/terraform-provider-clickup/internal/service/space"
+	"github.com/catdevman/terraform-provider-clickup/internal/service/spaces"
 	"github.com/catdevman/terraform-provider-clickup/internal/service/teams"
+	"github.com/catdevman/terraform-provider-clickup/internal/service/usergroups"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 
-	goclickup "github.com/raksul/go-clickup/clickup"
+	"github.com/raksul/go-clickup/clickup"
 )
 
 // Ensure ScaffoldingProvider satisfies various provider interfaces.
@@ -45,8 +50,8 @@ func (p *ClickUpProvider) Schema(ctx context.Context, req provider.SchemaRequest
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			consts.APITokenSchemaKey: schema.StringAttribute{
-                Sensitive: true, 
 				MarkdownDescription: "ClickUp API Token - needed to talk to ClickUp API",
+                Sensitive: true, 
 				Required: true,
 			},
 		},
@@ -62,12 +67,9 @@ func (p *ClickUpProvider) Configure(ctx context.Context, req provider.ConfigureR
 		return
 	}
 
-    tflog.Warn(ctx, fmt.Sprintf("%s", data.APIToken.ValueString()))
-
-    client := goclickup.NewClient(nil, data.APIToken.ValueString())
-    _,_, err := client.Authorization.GetAuthorizedUser(ctx)
+    client := clickup.NewClient(nil, data.APIToken.ValueString())
+    _, _, err := client.Authorization.GetAuthorizedUser(ctx)
     if err != nil {
-        tflog.Error(ctx, fmt.Sprintf("unique_thing: %+v", err))
         resp.Diagnostics.Append(
             diag.NewErrorDiagnostic("Unable to create ClickUp client", "ClickUp client requires authorization to function"),
         )
@@ -86,6 +88,13 @@ func (p *ClickUpProvider) Resources(ctx context.Context) []func() resource.Resou
 func (p *ClickUpProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
         teams.NewDataSource,
+        usergroups.NewDataSource,
+        spaces.NewDataSource,
+        space.NewDataSource,
+        folders.NewDataSource,
+        folder.NewDataSource,
+        lists.NewDataSource,
+        folderlesslists.NewDataSource,
 	}
 }
 

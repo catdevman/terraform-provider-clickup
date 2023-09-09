@@ -46,6 +46,7 @@ func (c *ClickUpTeamsDataSource) Configure(ctx context.Context, req datasource.C
 
 func (c *ClickUpTeamsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse){
     var data ClickUpTeamsDataSourceModel
+
     resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
     if resp.Diagnostics.HasError(){
         return
