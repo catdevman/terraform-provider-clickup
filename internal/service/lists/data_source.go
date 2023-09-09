@@ -82,6 +82,9 @@ func (c *ClickUpListsDataSource) Read(ctx context.Context, req datasource.ReadRe
             Status: st,
             Priority: p,
             Assignee: types.StringValue(l.Assignee.Username),
+            TaskCount: types.StringValue(l.TaskCount.String()),
+            DueDate: types.StringValue(l.DueDate),
+            StartDate: types.StringValue(l.StartDate),
         }
         data.Lists = append(data.Lists, list)
     }
