@@ -1,4 +1,4 @@
-package lists
+package folderlesslists
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 func (c *ClickUpListsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse){
     resp.Schema = schema.Schema{
         Attributes: map[string]schema.Attribute{
-            "folder_id": schema.StringAttribute{
+            "space_id": schema.StringAttribute{
                 Required: true,
             },
             "lists": schema.ListNestedAttribute{

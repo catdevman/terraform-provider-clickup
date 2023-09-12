@@ -8,6 +8,7 @@ import (
 
 	"github.com/catdevman/terraform-provider-clickup/internal/consts"
 	"github.com/catdevman/terraform-provider-clickup/internal/service/folder"
+	"github.com/catdevman/terraform-provider-clickup/internal/service/folderlesslists"
 	"github.com/catdevman/terraform-provider-clickup/internal/service/folders"
 	"github.com/catdevman/terraform-provider-clickup/internal/service/lists"
 	"github.com/catdevman/terraform-provider-clickup/internal/service/space"
@@ -93,6 +94,7 @@ func (p *ClickUpProvider) DataSources(ctx context.Context) []func() datasource.D
         folders.NewDataSource,
         folder.NewDataSource,
         lists.NewDataSource,
+        folderlesslists.NewDataSource,
 	}
 }
 

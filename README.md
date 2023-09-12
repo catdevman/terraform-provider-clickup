@@ -9,11 +9,18 @@
   - [ ] Groups
 - [ ] Users
 - [ ] User
-- [ ] Spaces
-- [ ] Space
-- [ ] Folders
-- [ ] Folder
+- [x] Spaces
+- [x] Space
+- [x] Folders
+- [x] Folder
+- [x] Lists
+- [ ] List
+- [x] Folderless Lists
+- [ ] Folderless List
 - [ ] Tasks
+  - [ ] List
+  - [ ] Team (Workspace)
+  - [ ] By Task Ids
 - [ ] Task
 
 # Resources
@@ -34,13 +41,13 @@
   - [ ] Delete
 - [ ] Folder
   - [ ] Create
-    - [ ] Folder
-    - [ ] Folderless
   - [ ] Read
   - [ ] Update
   - [ ] Delete
 - [ ] List
   - [ ] Create
+    - [ ] Foldered
+    - [ ] Folderless
   - [ ] Read
   - [ ] Update
   - [ ] Delete

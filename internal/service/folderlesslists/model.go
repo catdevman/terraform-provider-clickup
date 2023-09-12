@@ -1,11 +1,11 @@
-package lists
+package folderlesslists
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type ClickUpListsWrapperDataSourceModel struct {
-    FolderId types.String `tfsdk:"folder_id"`
+    SpaceId types.String `tfsdk:"space_id"`
     Lists []ClickUpListDataSourceModel `tfsdk:"lists"`
 }
 

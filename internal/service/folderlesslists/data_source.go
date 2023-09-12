@@ -1,4 +1,4 @@
-package lists
+package folderlesslists
 
 import (
 	"context"
@@ -23,7 +23,7 @@ type ClickUpListsDataSource struct {
 }
 
 func (c *ClickUpListsDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-    resp.TypeName = req.ProviderTypeName + "_lists"
+    resp.TypeName = req.ProviderTypeName + "_folderless_lists"
 }
 
 func (c *ClickUpListsDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -53,7 +53,7 @@ func (c *ClickUpListsDataSource) Read(ctx context.Context, req datasource.ReadRe
         return
     }
 
-    lists, _, err := c.client.Lists.GetLists(ctx, data.FolderId.ValueString(), false)
+    lists, _, err := c.client.Lists.GetFolderlessLists(ctx, data.SpaceId.ValueString(), false)
     if err != nil {
         resp.Diagnostics.AddError(
             "ClickUp Client had issue getting Spaces",
@@ -99,7 +99,7 @@ func (c *ClickUpListsDataSource) Read(ctx context.Context, req datasource.ReadRe
             Folder: f,
             Space: s,
             Archived: types.BoolValue(l.Archived),
-            OverrideStatuses: types.BoolValue(false), //TODO: This is not currently in the clickup client
+            OverrideStatuses: types.BoolValue(false), //TODO: why is this value not here
             PermissionLevel: types.StringValue(l.PermissionLevel),
         }
         data.Lists = append(data.Lists, list)

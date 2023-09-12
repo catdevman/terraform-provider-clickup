@@ -39,6 +39,10 @@ data "clickup_lists" "lists" {
     folder_id = "90140103670"
 }
 
+data "clickup_folderless_lists" "folderless_lists"{
+    space_id = data.clickup_space.space.space.id
+}
+
 output "outtie" {
     value = data.clickup_teams.teams
 }
@@ -61,4 +65,12 @@ output "outtie5" {
 
 output "outtie6" {
     value = data.clickup_folder.folder
+}
+
+output "outtie7" {
+    value = data.clickup_lists.lists
+}
+
+output "outtie8" {
+    value = data.clickup_folderless_lists.folderless_lists
 }
