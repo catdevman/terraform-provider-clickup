@@ -28,6 +28,8 @@ Read-Only:
 - `id` (String) The identifier of this resource.
 - `members` (Attributes List) (see [below for nested schema](#nestedatt--teams--members))
 - `name` (String)
+- `plan` (Attributes) (see [below for nested schema](#nestedatt--teams--plan))
+- `seats` (Attributes) (see [below for nested schema](#nestedatt--teams--seats))
 
 <a id="nestedatt--teams--members"></a>
 ### Nested Schema for `teams.members`
@@ -65,3 +67,41 @@ Read-Only:
 - `profile_picture` (String)
 - `role` (Number)
 - `username` (String)
+
+
+
+<a id="nestedatt--teams--plan"></a>
+### Nested Schema for `teams.plan`
+
+Read-Only:
+
+- `id` (Number)
+- `name` (String)
+
+
+<a id="nestedatt--teams--seats"></a>
+### Nested Schema for `teams.seats`
+
+Read-Only:
+
+- `guests` (Attributes) (see [below for nested schema](#nestedatt--teams--seats--guests))
+- `members` (Attributes) (see [below for nested schema](#nestedatt--teams--seats--members))
+
+<a id="nestedatt--teams--seats--guests"></a>
+### Nested Schema for `teams.seats.guests`
+
+Read-Only:
+
+- `empty_guest_seats` (Number)
+- `filled_guest_seats` (Number)
+- `total_guest_seats` (Number)
+
+
+<a id="nestedatt--teams--seats--members"></a>
+### Nested Schema for `teams.seats.members`
+
+Read-Only:
+
+- `empty_member_seats` (Number)
+- `filled_members_seats` (Number)
+- `total_member_seats` (Number)
