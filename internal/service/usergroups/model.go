@@ -1,6 +1,8 @@
 package usergroups
 
-import "github.com/hashicorp/terraform-plugin-framework/types"
+import (
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
 
 type ClickUpUserGroupsDataSourceModel struct {
 	TeamId types.String                      `tfsdk:"team_id"`
@@ -19,17 +21,29 @@ type ClickUpUserGroupDataSourceModel struct {
 }
 
 type ClickUpUserGroupMemberSourceModel struct {
-	ID             types.String `tfsdk:"id"`
-	Username       types.String `tfsdk:"username"`
-	Email          types.String `tfsdk:"email"`
-	Color          types.String `tfsdk:"color"`
-	Intials        types.String `tfsdk:"initials"`
-	ProfilePicture types.String `tfsdk:"profilePicture"`
+	ID             int    `tfsdk:"id"`
+	Username       string `tfsdk:"username"`
+	Email          string `tfsdk:"email"`
+	Color          string `tfsdk:"color"`
+	Initials       string `tfsdk:"initials"`
+	ProfilePicture string `tfsdk:"profile_picture"`
 }
 
 type ClickUpUserGroupAvatarSourceModel struct {
-	AttachmentId types.String `tfsdk:"attachment_id"`
-	Color        types.String `tfsdk:"color"`
-	Source       types.String `tfsdk:"source"`
-	Icon         types.String `tfsdk:"icon"`
+	AttachmentId *string `tfsdk:"attachment_id"`
+	Color        *string `tfsdk:"color"`
+	Source       *string `tfsdk:"source"`
+	Icon         *string `tfsdk:"icon"`
+}
+
+type ClickUpUserGroupResourceModel struct {
+	Id          types.String                        `tfsdk:"id"`
+	TeamId      types.String                        `tfsdk:"teamid"`
+	UserId      types.String                        `tfsdk:"userid"`
+	Name        types.String                        `tfsdk:"name"`
+	Handle      types.String                        `tfsdk:"handle"`
+	DateCreated types.String                        `tfsdk:"date_created"`
+	Initials    types.String                        `tfsdk:"initials"`
+	Members     []ClickUpUserGroupMemberSourceModel `tfsdk:"members"`
+	Avatar      ClickUpUserGroupAvatarSourceModel   `tfsdk:"avatar"`
 }
