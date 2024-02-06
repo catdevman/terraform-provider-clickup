@@ -38,8 +38,8 @@ type ClickUpUserGroupAvatarSourceModel struct {
 
 type ClickUpUserGroupResourceModel struct {
 	Id          types.String                        `tfsdk:"id"`
-	TeamId      types.String                        `tfsdk:"teamid"`
-	UserId      types.String                        `tfsdk:"userid"`
+	TeamId      types.String                        `tfsdk:"team_id"`
+	UserId      types.String                        `tfsdk:"user_id"`
 	Name        types.String                        `tfsdk:"name"`
 	Handle      types.String                        `tfsdk:"handle"`
 	DateCreated types.String                        `tfsdk:"date_created"`
