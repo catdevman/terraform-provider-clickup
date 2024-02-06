@@ -10,24 +10,24 @@ import (
 )
 
 var (
-	_ resource.Resource              = &ClickUpUserGroupsResource{}
-	_ resource.ResourceWithConfigure = &ClickUpUserGroupsResource{}
+	_ resource.Resource              = &ClickUpUserGroupResourceModel{}
+	_ resource.ResourceWithConfigure = &ClickUpUserGroupResourceModel{}
 )
 
 func NewResource() resource.Resource {
-	return &ClickUpUserGroupsResource{}
+	return &ClickUpUserGroupResourceModel{}
 }
 
-type ClickUpUserGroupsResource struct {
+type ClickUpUserGroupResourceModel struct {
 	client *clickup.Client
 }
 
-func (r *ClickUpUserGroupsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *ClickUpUserGroupResourceModel) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_usergroup"
 }
 
 // Configure adds the provider configured client to the resource.
-func (r *ClickUpUserGroupsResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *ClickUpUserGroupResourceModel) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -47,12 +47,12 @@ func (r *ClickUpUserGroupsResource) Configure(_ context.Context, req resource.Co
 }
 
 // Schema defines the schema for the resource.
-func (c *ClickUpUserGroupsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (c *ClickUpUserGroupResourceModel) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{}
 }
 
 // Create creates the resource and sets the initial Terraform state.
-func (c *ClickUpUserGroupsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (c *ClickUpUserGroupResourceModel) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	// var userGroup ClickUpUserGroupResourceModel
 	var userGroup clickup.UserGroup
@@ -108,14 +108,14 @@ func (c *ClickUpUserGroupsResource) Create(ctx context.Context, req resource.Cre
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *ClickUpUserGroupsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *ClickUpUserGroupResourceModel) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (r *ClickUpUserGroupsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *ClickUpUserGroupResourceModel) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
-func (r *ClickUpUserGroupsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *ClickUpUserGroupResourceModel) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 }

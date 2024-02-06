@@ -59,7 +59,7 @@
 
 # Development Notes
 
-When working on this provider, you can add this to the top of `go.mod`` to use your local dev version of the CLI to test any changes:
+When working on this provider, you can add this to the top of `go.mod` to use your local dev version of the CLI to test any changes:
 ```
 replace github.com/raksul/go-clickup => ../go-clickup
 ```
