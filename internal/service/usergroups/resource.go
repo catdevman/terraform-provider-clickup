@@ -3,8 +3,8 @@ package usergroups
 import (
 	"context"
 	"fmt"
+	"strings"
 
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	_ resource.Resource              = &ClickUpUserGroupsResource{}
-	_ resource.ResourceWithConfigure = &ClickUpUserGroupsResource{}
+	_ resource.Resource                = &ClickUpUserGroupsResource{}
+	_ resource.ResourceWithConfigure   = &ClickUpUserGroupsResource{}
+	_ resource.ResourceWithImportState = &ClickUpUserGroupsResource{}
 )
 
 func NewResource() resource.Resource {
@@ -191,5 +192,57 @@ func (r *ClickUpUserGroupsResource) Delete(ctx context.Context, req resource.Del
 }
 
 func (r *ClickUpUserGroupsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	id, teamID, err := splitId(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			fmt.Errorf("error extracting values from import ID: %w", err).Error(),
+			"",
+		)
+	}
+
+	// call read with id and teamID
+	opts := &clickup.GetUserGroupsOptions{
+		TeamID:   teamID,
+		GroupIDs: []string{id},
+	}
+
+	groups, _, err := r.client.UserGroups.GetUserGroups(ctx, opts)
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			fmt.Errorf("error reading user group: %w", err).Error(),
+			"",
+		)
+	}
+
+	if len(groups) == 0 {
+		resp.Diagnostics.AddError(
+			fmt.Errorf("no user group found with id: %s", id).Error(),
+			"",
+		)
+	}
+
+	// Set the state
+	// var group = groups[0]
+	// group.TeamID = teamID
+	// group.ID = id
+	// diags := resp.State.Set(ctx, &group)
+	// if diags.HasError() {
+	// 	resp.Diagnostics.AddError(
+	// 		fmt.Errorf("error setting state: %v", diags).Error(),
+	// 		"",
+	// 	)
+	// }
+
+}
+
+// id looks like: team_id/id
+func splitId(id string) (string, string, error) {
+	splitLine := strings.Split(id, "/")
+	if len(splitLine) != 2 {
+		return "", "", fmt.Errorf("invalid ID. Use the format: team_id/group_id")
+	}
+	var team_id = splitLine[0]
+	var group_id = splitLine[1]
+	return team_id, group_id, nil
 }
