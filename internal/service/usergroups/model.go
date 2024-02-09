@@ -39,11 +39,19 @@ type ClickUpUserGroupAvatarSourceModel struct {
 type ClickUpUserGroupResourceModel struct {
 	Id          types.String                        `tfsdk:"id"`
 	TeamId      types.String                        `tfsdk:"team_id"`
-	UserId      types.String                        `tfsdk:"user_id"`
+	UserId      types.String                        `tfsdk:"userid"`
 	Name        types.String                        `tfsdk:"name"`
 	Handle      types.String                        `tfsdk:"handle"`
 	DateCreated types.String                        `tfsdk:"date_created"`
 	Initials    types.String                        `tfsdk:"initials"`
 	Members     []ClickUpUserGroupMemberSourceModel `tfsdk:"members"`
 	Avatar      ClickUpUserGroupAvatarSourceModel   `tfsdk:"avatar"`
+}
+
+type ClickUpUserGroupCreateResourceModel struct {
+	ID      types.String `tfsdk:"id"`
+	TeamID  types.String `tfsdk:"team_id"`
+	Name    types.String `tfsdk:"name"`
+	Handle  types.String `tfsdk:"handle"`
+	Members []int        `tfsdk:"members"`
 }
