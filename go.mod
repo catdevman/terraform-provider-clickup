@@ -10,6 +10,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.18.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/raksul/go-clickup v0.0.0-20240205020557-253e1c35fda7
+	github.com/hashicorp/terraform-plugin-testing v1.5.1
 )
 
 require (
