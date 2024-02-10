@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/raksul/go-clickup/clickup"
 )
 
@@ -43,6 +44,8 @@ func (c *ClickUpUserGroupsDataSource) Configure(ctx context.Context, req datasou
 }
 
 func (c *ClickUpUserGroupsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	tflog.Debug(ctx, "Starting Data Source Read")
+
 	var data ClickUpUserGroupsDataSourceModel
 	var opts clickup.GetUserGroupsOptions
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -81,7 +84,7 @@ func (c *ClickUpUserGroupsDataSource) Read(ctx context.Context, req datasource.R
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func getMembers(ctx context.Context, members []clickup.GroupMember) []ClickUpUserGroupMemberSourceModel {
+func getMembers(_ context.Context, members []clickup.GroupMember) []ClickUpUserGroupMemberSourceModel {
 	group_members := []ClickUpUserGroupMemberSourceModel{}
 
 	for _, m := range members {
@@ -99,8 +102,8 @@ func getMembers(ctx context.Context, members []clickup.GroupMember) []ClickUpUse
 	return group_members
 }
 
-// TODO: Figure out why avatar comes back as null
-func getAvatar(ctx context.Context, avatar clickup.UserGroupAvatar) ClickUpUserGroupAvatarSourceModel {
+// TODO: Figure out why avatar comes back as null.
+func getAvatar(_ context.Context, avatar clickup.UserGroupAvatar) ClickUpUserGroupAvatarSourceModel {
 	return ClickUpUserGroupAvatarSourceModel{
 		AttachmentId: avatar.AttachmentId,
 		Color:        avatar.Color,

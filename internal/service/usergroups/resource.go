@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -87,6 +86,8 @@ func (c *ClickUpUserGroupsResource) Schema(_ context.Context, _ resource.SchemaR
 
 // Create creates the resource and sets the initial Terraform state.
 func (c *ClickUpUserGroupsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	tflog.Debug(ctx, "Starting Resource Create")
+
 	// Retrieve values from plan
 	var userGroup ClickUpUserGroupCreateResourceModel
 	diags := req.Plan.Get(ctx, &userGroup)
@@ -131,7 +132,9 @@ func (c *ClickUpUserGroupsResource) Create(ctx context.Context, req resource.Cre
 
 // Read refreshes the Terraform state with the latest data.
 func (r *ClickUpUserGroupsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// Get current state
+	tflog.Debug(ctx, "Starting Resource Read")
+
+	// Get current state.
 	var state ClickUpUserGroupCreateResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -144,7 +147,7 @@ func (r *ClickUpUserGroupsResource) Read(ctx context.Context, req resource.ReadR
 		GroupIDs: []string{trimQuotes(state.ID.String())},
 	}
 
-	// Get refreshed use group value from the API
+	// Get refreshed user group value from the API.
 	groups, _, err := r.client.UserGroups.GetUserGroups(ctx, opts)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -153,29 +156,32 @@ func (r *ClickUpUserGroupsResource) Read(ctx context.Context, req resource.ReadR
 		)
 		return
 	}
-
-	// loop through groups and get the group with the same id as the state
-	for _, group := range groups {
-		if group.ID == state.ID.String() {
-			state.Name = types.StringValue(group.Name)
-			break
-		}
-	}
-
-	// throw error if group is not found
-	if state.ID.String() == "" {
+	if len(groups) != 1 {
 		resp.Diagnostics.AddError(
-			"Error Reading ClickUp User Groups",
-			"Group not found: "+state.ID.String(),
+			"Wrong number of ClickUp User Groups returned from API",
+			"Expected 1, got: "+fmt.Sprint(len(groups))+" groups.",
 		)
 		return
 	}
 
-	// Overwrite values with refreshed state
-	// state.Name = group.name
-	// state.Items = []ClickUpUserGroupResourceModel{}
+	// our API only returns a list, so we need to get out the first item.
+	var group = groups[0]
 
-	// Set refreshed state
+	state.ID = types.StringValue(group.ID)
+	state.Name = types.StringValue(group.Name)
+	if group.Handle != "<null>" {
+		state.Handle = types.StringValue(group.Handle)
+	}
+
+	var memberIDs []int
+	for _, member := range group.Members {
+		memberIDs = append(memberIDs, member.ID)
+	}
+	if len(memberIDs) > 0 {
+		state.Members = memberIDs
+	}
+
+	// Set refreshed state.
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -185,25 +191,33 @@ func (r *ClickUpUserGroupsResource) Read(ctx context.Context, req resource.ReadR
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *ClickUpUserGroupsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan clickup.UserGroup
+	tflog.Debug(ctx, "Starting Resource Update")
+
+	var plan ClickUpUserGroupCreateResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var oldState clickup.UserGroup
-	req.Config.Get(ctx, &oldState)
+	// get the old state, so we can figure out the changes required.
+	var oldState ClickUpUserGroupCreateResourceModel
+	req.State.Get(ctx, &oldState)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var membersToAdd []int64
+	var membersToAdd []int
+	var membersToRemove []int
+	tflog.Debug(ctx, fmt.Sprintf("Total state members: %d", len(oldState.Members)))
+	tflog.Debug(ctx, fmt.Sprintf("Total plan members: %d", len(plan.Members)))
 
-	// find the members in the plan that are not in the state
+	// find the members in the plan that are not in the state.
+	// eg: the ones we want to add.
 	for _, member := range plan.Members {
 		found := false
+
 		for _, stateMember := range oldState.Members {
 			if member == stateMember {
 				found = true
@@ -211,31 +225,72 @@ func (r *ClickUpUserGroupsResource) Update(ctx context.Context, req resource.Upd
 			}
 		}
 		if !found {
-			membersToAdd = append(membersToAdd, int64(member.ID))
+			tflog.Debug(ctx, fmt.Sprintf("Adding new member: %d", member))
+			membersToAdd = append(membersToAdd, member)
+		}
+	}
+	// find the members in the STATE that are not in the plan.
+	// eg: the ones we want to remove.
+	for _, member := range oldState.Members {
+		found := false
+
+		for _, stateMember := range plan.Members {
+			if member == stateMember {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			tflog.Debug(ctx, fmt.Sprintf("Removing member: %d", member))
+			membersToRemove = append(membersToRemove, member)
 		}
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("Total members to add: %d", len(membersToAdd)))
+	tflog.Debug(ctx, fmt.Sprintf("Total members to remove: %d", len(membersToRemove)))
+
 	opts := &clickup.UpdateUserGroupRequest{
-		Name:   plan.Name,
-		Handle: plan.Handle,
-		Members: clickup.UpdateUserGroupMember{
-			Add:    make([]int, len(membersToAdd)),
-			Remove: []int{},
-		},
+		Name: trimQuotes(plan.Name.String()),
 	}
 
-	updatedGroup, _, err := r.client.UserGroups.UpdateUserGroup(ctx, plan.TeamID, opts)
+	if plan.Handle.String() != "<null>" {
+		opts.Handle = plan.Handle.String()
+	}
+	if len(membersToAdd) > 0 {
+		opts.Members.Add = membersToAdd
+	}
+	if len(membersToRemove) > 0 {
+		opts.Members.Remove = membersToRemove
+	}
+
+	updatedGroup, updateResponse, err := r.client.UserGroups.UpdateUserGroup(ctx, trimQuotes(oldState.ID.String()), opts)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Updating User Group",
-			"Could not update user group, unexpected error: "+err.Error(),
+			"Could not update User Group, unexpected error: "+err.Error(),
+			getResponseBody(ctx, updateResponse),
 		)
 		return
 	}
 
-	plan.Members = append(plan.Members, updatedGroup.Members...)
-	plan.Name = updatedGroup.Name
-	plan.Handle = updatedGroup.Handle
+	memberIDs := make([]int, len(updatedGroup.Members))
+	for i, member := range updatedGroup.Members {
+		memberIDs[i] = member.ID
+	}
+	tflog.Debug(ctx, fmt.Sprintf("Adding memebers to final state: %d", len(memberIDs)))
+	// plan.Members = append(plan.Members, memberIDs...)
+	plan.Members = memberIDs
+
+	plan.Name = types.StringValue(updatedGroup.Name)
+	// plan.Handle = types.StringValue(trimQuotes(updatedGroup.Handle))
+	// if updatedGroup.Handle != "<null>" || updatedGroup.Handle != "" {
+	// 	plan.Handle = types.StringValue(trimQuotes(updatedGroup.Handle))
+	// }
+	// if plan.Handle == types.StringValue("<null>") {
+	// 	plan.Handle = types.StringValue("")
+	// }
+
+	plan.ID = types.StringValue(updatedGroup.ID)
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
@@ -246,28 +301,31 @@ func (r *ClickUpUserGroupsResource) Update(ctx context.Context, req resource.Upd
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (r *ClickUpUserGroupsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state clickup.UserGroup
+	tflog.Debug(ctx, "Starting Resource Delete")
+
+	var state ClickUpUserGroupCreateResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err := r.client.UserGroups.DeleteUserGroup(ctx, state.ID)
+	deleteResponse, err := r.client.UserGroups.DeleteUserGroup(ctx, trimQuotes(state.ID.String()))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Deleting User Group",
-			"Could not delete user group, unexpected error: "+err.Error(),
+			"Could not delete User Group, unexpected error: "+err.Error(),
+			getResponseBody(ctx, deleteResponse),
 		)
 		return
 	}
 }
 
 func (r *ClickUpUserGroupsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	tflog.Debug(ctx, "Starting Resource Import")
 	teamID, groupId, err := splitId(req.ID)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			fmt.Errorf("error extracting values from import ID: %w", err).Error(),
+			"Error extracting values from import ID: "+err.Error(),
 			"",
 		)
 	}
@@ -282,14 +340,14 @@ func (r *ClickUpUserGroupsResource) ImportState(ctx context.Context, req resourc
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			fmt.Errorf("error reading user group: %w", err).Error(),
+			"Error reading user group: "+err.Error(),
 			getResponseBody(ctx, readResponse),
 		)
 	}
 
 	if len(groups) == 0 {
 		resp.Diagnostics.AddError(
-			fmt.Errorf("no user group found with id: %s", groupId).Error(),
+			"No user group found with id: "+groupId,
 			getResponseBody(ctx, readResponse),
 		)
 	}
@@ -307,14 +365,14 @@ func (r *ClickUpUserGroupsResource) ImportState(ctx context.Context, req resourc
 	diags := resp.State.Set(ctx, &userGroup)
 	if diags.HasError() {
 		resp.Diagnostics.AddError(
-			fmt.Errorf("error setting state: %v", diags).Error(),
+			fmt.Errorf("Error setting state: %v", diags).Error(),
 			"",
 		)
 	}
 
 }
 
-// id looks like: team_id/id
+// 'id' looks like: 'team_id/id'.
 func splitId(id string) (string, string, error) {
 	splitLine := strings.Split(id, "/")
 	if len(splitLine) != 2 {
@@ -329,11 +387,11 @@ func trimQuotes(s string) string {
 	return strings.Trim(s, "\"")
 }
 
-func getResponseBody(ctx context.Context, res *clickup.Response) string {
+func getResponseBody(_ context.Context, res *clickup.Response) string {
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return "There was an error getting the response body"
 	}
 
 	return string(body)

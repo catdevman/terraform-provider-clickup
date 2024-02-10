@@ -25,10 +25,10 @@
 
 # Resources
 - [x] User Group
-  - [ ] Create
+  - [x] Create
   - [x] Read
-  - [ ] Update
-  - [ ] Delete
+  - [x] Update
+  - [x] Delete
 - [ ] User
   - [ ] Create
   - [ ] Read
@@ -59,7 +59,15 @@
 
 # Development Notes
 
+## Local Go CLI
+
 When working on this provider, you can add this to the top of `go.mod` to use your local dev version of the CLI to test any changes:
 ```
 replace github.com/raksul/go-clickup => ../go-clickup
+```
+
+## Log levels
+
+```sh
+TF_LOG=DEBUG terraform apply
 ```
