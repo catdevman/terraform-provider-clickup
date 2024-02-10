@@ -13,8 +13,8 @@ description: |-
 ## Example Usage
 
 ```terraform
-provider "clickcup" {
-  # example configuration here
+provider "clickup" {
+  api_token = "API_KEY"
 }
 ```
 
