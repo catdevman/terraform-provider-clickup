@@ -13,8 +13,16 @@ description: |-
 ## Example Usage
 
 ```terraform
-provider "clickcup" {
-  # example configuration here
+terraform {
+  required_providers {
+    clickup = {
+      source = "catdevman/clickup"
+    }
+  }
+}
+
+provider "clickup" {
+  api_token = "API_KEY"
 }
 ```
 

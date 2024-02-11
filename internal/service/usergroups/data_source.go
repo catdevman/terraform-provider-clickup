@@ -3,9 +3,11 @@ package usergroups
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/raksul/go-clickup/clickup"
 )
 
@@ -42,20 +44,23 @@ func (c *ClickUpUserGroupsDataSource) Configure(ctx context.Context, req datasou
 }
 
 func (c *ClickUpUserGroupsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	tflog.Debug(ctx, "Starting Data Source Read")
+
 	var data ClickUpUserGroupsDataSourceModel
 	var opts clickup.GetUserGroupsOptions
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	if !data.TeamId.IsNull() {
-		opts.TeamID = data.TeamId.String()
+		opts.TeamID = strings.Trim(data.TeamId.String(), "\"")
 	}
 
 	groups, _, err := c.client.UserGroups.GetUserGroups(ctx, &opts)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"failed to make call to ClickUp API",
+			"during call to ClickUp API",
 			fmt.Sprintf("err: %s", err),
 		)
 	}
@@ -64,7 +69,7 @@ func (c *ClickUpUserGroupsDataSource) Read(ctx context.Context, req datasource.R
 
 	for _, g := range groups {
 		group = ClickUpUserGroupDataSourceModel{
-			Id:          types.StringValue(g.ID),
+			Id:          types.StringValue(fmt.Sprint(g.ID)),
 			UserId:      types.StringValue(fmt.Sprint(g.UserID)),
 			Name:        types.StringValue(g.Name),
 			Handle:      types.StringValue(g.Handle),
@@ -79,25 +84,30 @@ func (c *ClickUpUserGroupsDataSource) Read(ctx context.Context, req datasource.R
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func getMembers(ctx context.Context, members []clickup.GroupMember) []ClickUpUserGroupMemberSourceModel {
-	mems := []ClickUpUserGroupMemberSourceModel{}
+func getMembers(_ context.Context, members []clickup.GroupMember) []ClickUpUserGroupMemberSourceModel {
+	group_members := []ClickUpUserGroupMemberSourceModel{}
 
 	for _, m := range members {
 		mem := ClickUpUserGroupMemberSourceModel{
-			ID:             types.StringValue(fmt.Sprint(m.ID)),
-			Username:       types.StringValue(m.Username),
-			Email:          types.StringValue(m.Email),
-			Color:          types.StringValue(m.Color),
-			Intials:        types.StringValue(m.Initials),
-			ProfilePicture: types.StringValue(m.ProfilePicture),
+			ID:             m.ID,
+			Username:       m.Username,
+			Email:          m.Email,
+			Color:          m.Color,
+			Initials:       m.Initials,
+			ProfilePicture: m.ProfilePicture,
 		}
-		mems = append(mems, mem)
+		group_members = append(group_members, mem)
 	}
 
-	return mems
+	return group_members
 }
 
-// TODO: Figure out why avatar comes back as any
-func getAvatar(ctx context.Context, avatar any) ClickUpUserGroupAvatarSourceModel {
-	return ClickUpUserGroupAvatarSourceModel{}
+// TODO: Figure out why avatar comes back as null.
+func getAvatar(_ context.Context, avatar clickup.UserGroupAvatar) ClickUpUserGroupAvatarSourceModel {
+	return ClickUpUserGroupAvatarSourceModel{
+		AttachmentId: avatar.AttachmentId,
+		Color:        avatar.Color,
+		Source:       avatar.Source,
+		Icon:         avatar.Icon,
+	}
 }

@@ -1,6 +1,8 @@
 module github.com/catdevman/terraform-provider-clickup
 
-go 1.19
+go 1.21.1
+
+toolchain go1.21.6
 
 require (
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
@@ -8,7 +10,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.18.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-testing v1.5.1
-	github.com/raksul/go-clickup v0.0.0-20230724022611-03151315cb7f
+	github.com/raksul/go-clickup v0.0.0-20240205020557-253e1c35fda7
 )
 
 require (

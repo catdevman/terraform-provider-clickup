@@ -25,10 +25,8 @@ import (
 	"github.com/raksul/go-clickup/clickup"
 )
 
-// Ensure ScaffoldingProvider satisfies various provider interfaces.
 var _ provider.Provider = &ClickUpProvider{}
 
-// ScaffoldingProvider defines the provider implementation.
 type ClickUpProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
@@ -81,7 +79,9 @@ func (p *ClickUpProvider) Configure(ctx context.Context, req provider.ConfigureR
 }
 
 func (p *ClickUpProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		usergroups.NewResource,
+	}
 }
 
 func (p *ClickUpProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
