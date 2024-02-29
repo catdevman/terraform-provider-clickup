@@ -90,9 +90,9 @@ func convertTeamMembers(members []clickup.TeamMember) []ClickUpTeamMemberDataSou
 	if len(members) == 0 {
 		return []ClickUpTeamMemberDataSourceModel{}
 	}
-	result := make([]ClickUpTeamMemberDataSourceModel, 0, len(members))
+	result := make([]ClickUpTeamMemberDataSourceModel, len(members))
 
-	for _, member := range members {
+	for i, member := range members {
 		mem := ClickUpTeamMemberDataSourceModel{
 			User: ClickUpTeamUserDataSourceModel{
 				Id:             types.Int64Value(int64(member.User.ID)),
@@ -114,7 +114,7 @@ func convertTeamMembers(members []clickup.TeamMember) []ClickUpTeamMemberDataSou
 				Initials:       types.StringValue(member.InvitedBy.Initials),
 			},
 		}
-		result = append(result, mem)
+		result[i] = mem
 	}
 	return result
 }
