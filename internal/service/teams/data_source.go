@@ -90,9 +90,9 @@ func convertTeamMembers(members []clickup.TeamMember) []ClickUpTeamMemberDataSou
 	if len(members) == 0 {
 		return []ClickUpTeamMemberDataSourceModel{}
 	}
-	result := make([]ClickUpTeamMemberDataSourceModel, len(members), len(members))
+	result := make([]ClickUpTeamMemberDataSourceModel, len(members))
 
-	for _, member := range members {
+	for i, member := range members {
 		mem := ClickUpTeamMemberDataSourceModel{
 			User: ClickUpTeamUserDataSourceModel{
 				Id:             types.Int64Value(int64(member.User.ID)),
@@ -114,12 +114,12 @@ func convertTeamMembers(members []clickup.TeamMember) []ClickUpTeamMemberDataSou
 				Initials:       types.StringValue(member.InvitedBy.Initials),
 			},
 		}
-		result = append(result, mem)
+		result[i] = mem
 	}
 	return result
 }
 
-// FIXME: Figure out how to get ints into types.Int64Value so we don't need this struct to translate
+// FIXME: Figure out how to get ints into types.Int64Value so we don't need this struct to translate.
 func getTeamSeats(ctx context.Context, client *clickup.Client, teamId string) (ClickUpTeamSeatsSourceModel, error) {
 	s := ClickUpTeamSeatsSourceModel{}
 	req, err := client.NewRequest(http.MethodGet, fmt.Sprintf("team/%s/seats", teamId), nil)

@@ -79,7 +79,7 @@ func (c *ClickUpUserGroupsDataSource) Read(ctx context.Context, req datasource.R
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func getMembers(ctx context.Context, members []clickup.GroupMember) []ClickUpUserGroupMemberSourceModel {
+func getMembers(_ context.Context, members []clickup.GroupMember) []ClickUpUserGroupMemberSourceModel {
 	mems := []ClickUpUserGroupMemberSourceModel{}
 
 	for _, m := range members {
@@ -97,7 +97,7 @@ func getMembers(ctx context.Context, members []clickup.GroupMember) []ClickUpUse
 	return mems
 }
 
-// TODO: Figure out why avatar comes back as any
-func getAvatar(ctx context.Context, avatar any) ClickUpUserGroupAvatarSourceModel {
+// TODO: Figure out why avatar comes back as any.
+func getAvatar(_ context.Context, avatar any) ClickUpUserGroupAvatarSourceModel {
 	return ClickUpUserGroupAvatarSourceModel{}
 }
