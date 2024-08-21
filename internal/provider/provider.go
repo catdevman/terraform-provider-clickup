@@ -51,8 +51,8 @@ func (p *ClickUpProvider) Schema(ctx context.Context, req provider.SchemaRequest
 		Attributes: map[string]schema.Attribute{
 			consts.APITokenSchemaKey: schema.StringAttribute{
 				MarkdownDescription: "ClickUp API Token - needed to talk to ClickUp API",
-                Sensitive: true, 
-				Required: true,
+				Sensitive:           true,
+				Required:            true,
 			},
 		},
 	}
@@ -67,34 +67,33 @@ func (p *ClickUpProvider) Configure(ctx context.Context, req provider.ConfigureR
 		return
 	}
 
-    client := clickup.NewClient(nil, data.APIToken.ValueString())
-    _, _, err := client.Authorization.GetAuthorizedUser(ctx)
-    if err != nil {
-        resp.Diagnostics.Append(
-            diag.NewErrorDiagnostic("Unable to create ClickUp client", "ClickUp client requires authorization to function"),
-        )
-        return
-    }
+	client := clickup.NewClient(nil, data.APIToken.ValueString())
+	_, _, err := client.Authorization.GetAuthorizedUser(ctx)
+	if err != nil {
+		resp.Diagnostics.Append(
+			diag.NewErrorDiagnostic("Unable to create ClickUp client", "ClickUp client requires authorization to function"),
+		)
+		return
+	}
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
 
 func (p *ClickUpProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-	}
+	return []func() resource.Resource{}
 }
 
 func (p *ClickUpProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-        teams.NewDataSource,
-        usergroups.NewDataSource,
-        spaces.NewDataSource,
-        space.NewDataSource,
-        folders.NewDataSource,
-        folder.NewDataSource,
-        lists.NewDataSource,
-        folderlesslists.NewDataSource,
+		teams.NewDataSource,
+		usergroups.NewDataSource,
+		spaces.NewDataSource,
+		space.NewDataSource,
+		folders.NewDataSource,
+		folder.NewDataSource,
+		lists.NewDataSource,
+		folderlesslists.NewDataSource,
 	}
 }
 
