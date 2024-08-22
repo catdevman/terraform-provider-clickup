@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	// "github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/raksul/go-clickup/clickup"
 )
 

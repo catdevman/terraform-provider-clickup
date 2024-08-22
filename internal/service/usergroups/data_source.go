@@ -70,8 +70,8 @@ func (c *ClickUpUserGroupsDataSource) Read(ctx context.Context, req datasource.R
 			Handle:      types.StringValue(g.Handle),
 			DateCreated: types.StringValue(g.DateCreated),
 			Initials:    types.StringValue(g.Initials),
-			Members:     getMembers(ctx, g.Members),
-			Avatar:      getAvatar(ctx, g.Avatar),
+			Members:     getMembers(g.Members),
+			Avatar:      getAvatar(),
 		}
 		data.Groups = append(data.Groups, group)
 	}
@@ -79,7 +79,8 @@ func (c *ClickUpUserGroupsDataSource) Read(ctx context.Context, req datasource.R
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func getMembers(ctx context.Context, members []clickup.GroupMember) []ClickUpUserGroupMemberSourceModel {
+func getMembers(members []clickup.GroupMember) []ClickUpUserGroupMemberSourceModel {
+	// fmt.Println(ctx)
 	mems := []ClickUpUserGroupMemberSourceModel{}
 
 	for _, m := range members {
@@ -97,7 +98,7 @@ func getMembers(ctx context.Context, members []clickup.GroupMember) []ClickUpUse
 	return mems
 }
 
-// TODO: Figure out why avatar comes back as any
-func getAvatar(ctx context.Context, avatar any) ClickUpUserGroupAvatarSourceModel {
+// TODO: Figure out why avatar comes back as any.
+func getAvatar() ClickUpUserGroupAvatarSourceModel {
 	return ClickUpUserGroupAvatarSourceModel{}
 }
