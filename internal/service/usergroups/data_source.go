@@ -80,7 +80,6 @@ func (c *ClickUpUserGroupsDataSource) Read(ctx context.Context, req datasource.R
 }
 
 func getMembers(members []clickup.GroupMember) []ClickUpUserGroupMemberSourceModel {
-	// fmt.Println(ctx)
 	mems := []ClickUpUserGroupMemberSourceModel{}
 
 	for _, m := range members {
